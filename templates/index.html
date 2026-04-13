@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Empire CMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased min-h-screen">
+
+    <header class="bg-gray-800 shadow-lg p-6 border-b border-gray-700">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wider text-blue-400">
+                <i class="fa-solid fa-robot mr-2"></i> Empire Watchdog CMS
+            </h1>
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition duration-200">
+                <i class="fa-solid fa-rotate-right mr-2"></i> Refresh Status
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto mt-8 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {% for key, bot in bots.items() %}
+            <div class="bg-gray-800 rounded-lg p-6 shadow-xl border border-gray-700 transition transform hover:-translate-y-1">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">{{ bot.name }}</h2>
+                    <div class="flex items-center">
+                        <span id="indicator-{{ key }}" class="h-3 w-3 rounded-full {{ bot.bg_color }} mr-2 animate-pulse"></span>
+                        <span id="status-{{ key }}" class="text-sm font-medium {{ bot.color }}">{{ bot.status }}</span>
+                    </div>
+                </div>
+                
+                <p class="text-gray-400 text-sm mb-6 font-mono">Script: {{ bot.file }}</p>
+                
+                <div class="flex space-x-3">
+                    <button onclick="toggleBot('{{ key }}', 'start')" class="flex-1 bg-green-600 hover:bg-green-500 text-white py-2 rounded transition duration-200 font-medium">
+                        <i class="fa-solid fa-play mr-1"></i> Start
+                    </button>
+                    <button onclick="toggleBot('{{ key }}', 'stop')" class="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded transition duration-200 font-medium">
+                        <i class="fa-solid fa-stop mr-1"></i> Stop
+                    </button>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-full bg-gray-800 rounded-lg p-10 text-center border border-gray-700">
+                <i class="fa-solid fa-triangle-exclamation text-4xl text-yellow-500 mb-4"></i>
+                <h2 class="text-2xl font-bold mb-2">No Bots Found</h2>
+                <p class="text-gray-400">Add bots via the Telegram Admin Dashboard to see them here.</p>
+            </div>
+            {% endfor %}
+
+        </div>
+    </main>
+
+    <script>
+        function toggleBot(botKey, action) {
+            // Send API Request to Flask
+            fetch(`/api/toggle/${botKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    // Update UI Dynamically
+                    const statusText = document.getElementById(`status-${botKey}`);
+                    const indicator = document.getElementById(`indicator-${botKey}`);
+                    
+                    statusText.innerText = data.new_status;
+                    
+                    if(data.new_status === "Online") {
+                        statusText.className = "text-sm font-medium text-green-500";
+                        indicator.className = "h-3 w-3 rounded-full bg-green-500 mr-2 animate-pulse";
+                    } else {
+                        statusText.className = "text-sm font-medium text-red-500";
+                        indicator.className = "h-3 w-3 rounded-full bg-red-500 mr-2";
+                    }
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("Failed to communicate with the server.");
+            });
+        }
+    </script>
+</body>
+</html>
