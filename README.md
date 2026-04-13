@@ -121,15 +121,7 @@ nohup gunicorn --workers 1 --bind 0.0.0.0:5000 app:app &
 python3 main.py
 ```
 
------
 
-## ⚠️ Security & Deployment Notice
-
-  * **Never commit your `.env` or `*.session` files to version control.** These contain complete access to your Telegram account and Facebook pages.
-  * Ensure your `.gitignore` file includes `__pycache__/`, `*.session`, `*.session-journal`, `*.log`, and `.env`.
-  * When deploying `app.py` to the public internet, ensure `FLASK_DEBUG=False` to prevent unauthorized arbitrary code execution.
-
------
 
 *Built by [ephremageru](https://www.google.com/search?q=https://github.com/ephremageru). Designed for scale.*
 
