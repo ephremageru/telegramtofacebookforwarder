@@ -1,11 +1,11 @@
-# 👑 13-Bot Empire: Master Orchestrator & Web CMS
+# 👑 Telegram to Facebook Forwarder: Master Orchestrator & Web CMS
 
 ![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
 ![Flask](https://img.shields.io/badge/Framework-Flask-black.svg)
 ![Telethon](https://img.shields.io/badge/Library-Telethon-lightgrey.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-Welcome to the **13-Bot Empire** repository! This project is a complete, production-grade automation suite designed for mass Telegram channel management, content scraping, and cross-platform publishing (Telegram to Facebook Graph API). 
+Welcome to the **telegramtofacebookforwarder** repository! This project is a complete, production-grade automation suite designed for mass Telegram channel management, content scraping, and cross-platform publishing (Telegram to Facebook Graph API). 
 
 It features a dual-control architecture: you can manage your fleet of bots directly via a **Telegram Inline Keyboard UI** or through a secure, fully authenticated **Web CMS Dashboard**.
 
