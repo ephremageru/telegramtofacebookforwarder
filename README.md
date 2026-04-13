@@ -1,93 +1,126 @@
-# 👑 Telegram to Facebook Forwarder: Master Orchestrator & Web CMS
+# Telegram → Facebook Forwarder — Master Orchestrator & Web CMS
 
-![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
-![Flask](https://img.shields.io/badge/Framework-Flask-black.svg)
-![Telethon](https://img.shields.io/badge/Library-Telethon-lightgrey.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)]()
+[![Framework: Flask](https://img.shields.io/badge/Framework-Flask-black.svg)]()
+[![Library: Telethon](https://img.shields.io/badge/Library-Telethon-lightgrey.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
 
-Welcome to the **telegramtofacebookforwarder** repository! This project is a complete, production-grade automation suite designed for mass Telegram channel management, content scraping, and cross-platform publishing (Telegram to Facebook Graph API). 
+A production-oriented automation suite for scraping content from Telegram channels and forwarding it to Facebook Pages. The project provides two control surfaces — a Telegram Inline Keyboard "watchdog" for remote control of bot processes and a secure Web CMS (Flask) for configuration and monitoring.
 
-It features a dual-control architecture: you can manage your fleet of bots directly via a **Telegram Inline Keyboard UI** or through a secure, fully authenticated **Web CMS Dashboard**.
-
----
-
-## 📂 Repository Structure
-
-Here is a breakdown of what each file in this repository does:
-
-| File | Description |
-|------|-------------|
-| `main.py` | **The Bridge Engine:** Scrapes media and text from target Telegram channels, formats the content, batches albums together asynchronously, and auto-posts to Facebook Pages. |
-| `watchdog.py` | **The Master Telegram Controller:** Generates an inline UI inside Telegram to remotely start, stop, pause, and monitor your fleet of child bots. |
-| `app.py` | **Pro Web CMS (Recommended):** A highly secure Flask backend featuring admin login (`@login_required`), dynamic `.py` configuration editing, and log monitoring. |
-| `web.py` | **Lightweight Web CMS:** A stripped-down, fast version of the web dashboard without authentication (useful for local/private network hosting). |
-| `templates/` | Contains the frontend UI files (`index.html` for the dashboard, `login.html` for secure access) styled with Tailwind CSS. |
-| `requirements.txt` | Contains all necessary Python dependencies (`Telethon`, `Flask`, `requests`, etc.). |
-| `.env` | *(Not uploaded)* Your secure configuration file for storing API keys, passwords, and tokens. |
+Key design goals: reliability, secure remote management, robust media handling (single images, videos, and multi-photo albums), and simple deployment for scale.
 
 ---
 
-## 🏗️ System Architecture
+## Table of contents
 
-```text
-[ Telegram Source Channels ]
-       │
-       ▼ (Listened to by MTProto)
-[ main.py (Facebook Bridge) ] ───► Formats, downloads, and groups media albums
-       │
-       ▼ (Uses Graph API v19.0)
-[ Facebook Page ] ───► Sends success ping back to Admin Dashboard
-````
+- [Repository structure](#repository-structure)
+- [Architecture overview](#architecture-overview)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration (.env)](#configuration-env)
+- [Running](#running)
+- [Security notes](#security-notes)
+- [Development & contribution](#development--contribution)
+- [License](#license)
 
-```text
-[ Admin User ]
-       │
-       ├─► Telegram App ──► [ watchdog.py ] (Process Management & Alerts)
-       │
-       └─► Web Browser  ──► [ app.py ] (Flask CMS: Start/Stop/Edit Configs)
+---
+
+## Repository structure
+
+| File / Dir | Purpose |
+|------------|---------|
+| `main.py`  | Bridge engine: listens to configured Telegram sources, formats media/text, batches albums, and posts to Facebook Pages using the Graph API. |
+| `watchdog.py` | Master Telegram controller: provides an inline keyboard UI in Telegram to start/stop/pause/monitor child bot processes and receive alerts. |
+| `app.py`   | Pro Web CMS (Flask): authentication-protected admin UI for viewing logs, start/stop processes, and editing configuration. |
+| `web.py`   | Lightweight Web CMS: minimal dashboard useful for local/private deployments (no auth by default). |
+| `templates/` | Frontend templates (dashboard, login) styled with Tailwind CSS. |
+| `requirements.txt` | Python package dependencies. |
+| `.env`     | (Not checked in) Environment variables and secrets. |
+
+---
+
+## Architecture overview
+
+Text diagram:
+
+```
+[ Telegram Source Channels ] --(MTProto)-->
+[ main.py (Bridge) ] --(Graph API v19.0)--> [ Facebook Page ]
+          ▲
+          |
+    Reports / pings
+          |
+[ Web CMS (app.py) ] ←→ [ Admin User (Browser) ]
+          ▲
+          |
+[ Telegram Watchdog (watchdog.py) ] ←→ [ Admin User (Telegram) ]
 ```
 
------
+---
 
-## ✨ Key Features
+## Features
 
-  * **Universal Media Forwarding:** Automatically downloads single photos, videos, and complex multi-photo albums from Telegram, debounces them using `asyncio`, and pushes them to Facebook as cohesive albums.
-  * **Pro Web CMS Dashboard:** A beautiful, dark-mode Tailwind CSS dashboard to monitor process health (`ps aux`), read live logs, and dynamically modify bot source targets without opening a code editor.
-  * **Shell-Injection Security:** The Flask backend utilizes `shlex` and regex sanitization to ensure malicious actors cannot pass terminal commands through the web UI.
-  * **Auto-Healing:** Background asynchronous tasks monitor child processes every hour and auto-restart any bots that crash due to server memory leaks or network drops.
+- Universal media forwarding: single photos, videos, and multi-photo albums are detected, downloaded, properly grouped, and forwarded to Facebook as coherent posts.
+- Async processing & batching: uses asyncio to debounce and batch media into albums before upload.
+- Pro Web CMS: secure admin login, live logs, process health checks, and dynamic configuration edits.
+- Telegram watchdog: inline keyboard for remote process control and alerting.
+- Shell-injection mitigations: command inputs from the web UI are sanitized using `shlex` and validated with regex.
+- Auto-healing: background tasks monitor child processes and automatically restart crashed bots.
 
------
+---
 
-## 🚀 Installation & Setup
+## Prerequisites
 
-**1. Clone the repository:**
+- Python 3.10 or later
+- Unix-like host for production (Debian/Ubuntu recommended)
+- Telegram API credentials (my.telegram.org)
+- Telegram Bot token (from BotFather) for the watchdog
+- Facebook Page ID and a Page Access Token with permissions to publish (Graph API)
+- (Recommended) A process manager (systemd, supervisord) or Docker for production
+
+---
+
+## Installation
+
+1. Clone this repository:
 
 ```bash
-git clone [https://github.com/ephremageru/13-Bot-Empire.git](https://github.com/ephremageru/13-Bot-Empire.git)
-cd 13-Bot-Empire
+git clone https://github.com/ephremageru/telegramtofacebookforwarder.git
+cd telegramtofacebookforwarder
 ```
 
-**2. Set up your Virtual Environment & Install Dependencies:**
+2. Create and activate a virtual environment, then install dependencies:
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
+source venv/bin/activate          # On Windows: venv\Scripts\activate
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-**3. Configure your Environment Variables:**
-Create a file named `.env` in the root folder and add your credentials:
+---
+
+## Configuration (.env)
+
+Create a `.env` file in the project root with the values below. Keep this file private — never commit it.
+
+Example `.env`:
 
 ```env
-# Telegram App Credentials (from my.telegram.org)
+# Telegram (from https://my.telegram.org)
 API_ID=your_api_id
 API_HASH=your_api_hash
 
-# Admin Watchdog Bot
+# Admin Watchdog (Telegram bot)
 BOT_TOKEN=your_botfather_token
 ADMIN_CHAT_ID=your_telegram_user_id
 
-# Web CMS Configuration
+# Facebook (publish permissions)
+FB_PAGE_ID=your_facebook_page_id
+FB_PAGE_ACCESS_TOKEN=your_long_lived_page_access_token
+
+# Web CMS
 SECRET_KEY=your_super_secret_cookie_key
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=your_secure_password
@@ -95,34 +128,79 @@ FLASK_PORT=5000
 FLASK_DEBUG=False
 ```
 
------
+Important:
+- Use a long-lived Facebook Page access token appropriate for server-side publishing.
+- Limit ADMIN_PASSWORD complexity and consider using environment-based secrets or a secrets manager in production.
 
-## ▶️ Running the Empire
+---
 
-**Option 1: Start the Telegram Watchdog**
-This brings your Telegram-based Inline Keyboard dashboard online.
+## Running
+
+Examples for development and production usage.
+
+1. Telegram watchdog (run in background):
 
 ```bash
-nohup python3 watchdog.py &
+# Development
+python3 watchdog.py
+
+# Production (example, using nohup)
+nohup python3 watchdog.py > watchdog.log 2>&1 &
 ```
 
-**Option 2: Start the Web CMS Dashboard**
-This brings the web interface online at `http://your-server-ip:5000`.
+2. Web CMS (Flask) — development:
 
 ```bash
-nohup gunicorn --workers 1 --bind 0.0.0.0:5000 app:app &
+python3 app.py
+# Visit: http://localhost:5000
 ```
 
-*(Note: If you just want to run the script directly for testing, you can use `python3 app.py`).*
-
-**Option 3: Start the Facebook Bridge manually**
+3. Web CMS — production (example using Gunicorn):
 
 ```bash
+nohup gunicorn --workers 2 --bind 0.0.0.0:5000 app:app &
+```
+
+4. Bridge (main) process:
+
+```bash
+# Run in foreground for testing
 python3 main.py
 
-
-
-*Built by [ephremageru](https://www.google.com/search?q=https://github.com/ephremageru). Designed for scale.*
-
+# Production: use systemd or supervisor to run as a service (recommended)
 ```
-```
+
+Deployment tip: use a process manager (systemd, supervisord, or Docker + restart policy) to ensure auto-restart and controlled logs.
+
+---
+
+## Security notes
+
+- Do NOT store tokens in version control. Use `.env` or a secrets manager.
+- The Web CMS contains dynamic config editing features — restrict access (network-level + strong passwords).
+- When exposing the web dashboard to the internet, use TLS (letsencrypt) and a reverse proxy (nginx).
+- Facebook publishing requires appropriate permissions; ensure you follow Facebook Platform policies to avoid rate-limiting or app suspension.
+
+---
+
+## Development & contribution
+
+- Fork the repo, create a feature branch, and open a pull request.
+- Include tests for new behavior where possible.
+- If you add new environment variables, update the README `.env` section.
+- For security fixes or urgent changes, open an issue or a PR marked with high priority.
+
+Suggested immediate improvements
+- Add a `.env.example` template to the repo.
+- Add systemd unit file examples and Dockerfiles for easier production deployment.
+- Add unit/integration tests for media batch logic and Facebook upload flows.
+
+---
+
+## License
+
+MIT — see LICENSE file.
+
+---
+
+Built by [ephremageru](https://github.com/ephremageru). Use responsibly and respect the terms of service of Telegram and Facebook.
