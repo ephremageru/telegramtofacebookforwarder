@@ -3,93 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Empire CMS</title>
+    <title>Empire CMS Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for logs */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        /* Modal Animation */
+        .modal-enter { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans antialiased min-h-screen">
+<body class="bg-gradient-to-br from-gray-900 via-gray-900 to-black min-h-screen text-gray-100 antialiased selection:bg-blue-500 selection:text-white">
 
-    <header class="bg-gray-800 shadow-lg p-6 border-b border-gray-700">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-wider text-blue-400">
-                <i class="fa-solid fa-robot mr-2"></i> Empire Watchdog CMS
-            </h1>
-            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition duration-200">
-                <i class="fa-solid fa-rotate-right mr-2"></i> Refresh Status
+    <div class="max-w-7xl mx-auto p-4 md:p-8 lg:p-10">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-10 border-b border-gray-800 pb-6 gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 tracking-tight">
+                    🦸‍♂️ Empire CMS Pro
+                </h1>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <p class="text-gray-400 text-sm font-medium">Auto-Healer Active | Live Production</p>
+                </div>
+            </div>
+            <a href="/logout" class="inline-flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 hover:shadow-lg active:scale-95 text-sm md:text-base backdrop-blur-sm">
+                🚪 Logout
+            </a>
+        </div>
+
+        <div id="bot-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center text-gray-500 py-10 animate-pulse">
+                Fetching Empire status...
+            </div>
+        </div>
+    </div>
+
+    <div id="configModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-900 p-6 md:p-8 rounded-2xl w-full max-w-lg border border-gray-700 shadow-2xl modal-enter max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold tracking-tight">⚙️ Bot Configuration</h2>
+                <button onclick="closeModal('configModal')" class="text-gray-400 hover:text-white transition-colors bg-gray-800 hover:bg-gray-700 rounded-full p-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <input type="hidden" id="config-bot-key">
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-gray-400 mb-1.5 text-sm font-medium">Telegram Source Channels (comma separated)</label>
+                    <input id="config-sources" type="text" class="w-full p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-400 mb-1.5 text-sm font-medium">Facebook Access Token</label>
+                    <input id="config-token" type="text" class="w-full p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-400 mb-1.5 text-sm font-medium">Instagram Account ID (Optional)</label>
+                    <input id="config-ig" type="text" class="w-full p-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none">
+                </div>
+            </div>
+            
+            <button onclick="saveConfig()" class="w-full px-4 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-bold transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-900/50">
+                💾 Save & Auto-Restart Bot
             </button>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-6xl mx-auto mt-8 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            {% for key, bot in bots.items() %}
-            <div class="bg-gray-800 rounded-lg p-6 shadow-xl border border-gray-700 transition transform hover:-translate-y-1">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">{{ bot.name }}</h2>
-                    <div class="flex items-center">
-                        <span id="indicator-{{ key }}" class="h-3 w-3 rounded-full {{ bot.bg_color }} mr-2 animate-pulse"></span>
-                        <span id="status-{{ key }}" class="text-sm font-medium {{ bot.color }}">{{ bot.status }}</span>
-                    </div>
-                </div>
-                
-                <p class="text-gray-400 text-sm mb-6 font-mono">Script: {{ bot.file }}</p>
-                
-                <div class="flex space-x-3">
-                    <button onclick="toggleBot('{{ key }}', 'start')" class="flex-1 bg-green-600 hover:bg-green-500 text-white py-2 rounded transition duration-200 font-medium">
-                        <i class="fa-solid fa-play mr-1"></i> Start
-                    </button>
-                    <button onclick="toggleBot('{{ key }}', 'stop')" class="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded transition duration-200 font-medium">
-                        <i class="fa-solid fa-stop mr-1"></i> Stop
-                    </button>
-                </div>
+    <div id="logsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-900 p-6 rounded-2xl w-full max-w-4xl border border-gray-700 shadow-2xl modal-enter">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold tracking-tight">📄 Live Logs</h2>
+                <button onclick="closeModal('logsModal')" class="text-gray-400 hover:text-white transition-colors bg-gray-800 hover:bg-gray-700 rounded-full p-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            {% else %}
-            <div class="col-span-full bg-gray-800 rounded-lg p-10 text-center border border-gray-700">
-                <i class="fa-solid fa-triangle-exclamation text-4xl text-yellow-500 mb-4"></i>
-                <h2 class="text-2xl font-bold mb-2">No Bots Found</h2>
-                <p class="text-gray-400">Add bots via the Telegram Admin Dashboard to see them here.</p>
+            <div class="bg-[#0D1117] p-4 rounded-xl border border-gray-800 relative">
+                <div class="absolute top-2 right-2 flex space-x-1">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <pre id="log-content" class="text-green-400 font-mono text-sm h-[60vh] md:h-96 overflow-y-auto whitespace-pre-wrap mt-2"></pre>
             </div>
-            {% endfor %}
-
         </div>
-    </main>
+    </div>
 
     <script>
-        function toggleBot(botKey, action) {
-            // Send API Request to Flask
-            fetch(`/api/toggle/${botKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ action: action })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success) {
-                    // Update UI Dynamically
-                    const statusText = document.getElementById(`status-${botKey}`);
-                    const indicator = document.getElementById(`indicator-${botKey}`);
-                    
-                    statusText.innerText = data.new_status;
-                    
-                    if(data.new_status === "Online") {
-                        statusText.className = "text-sm font-medium text-green-500";
-                        indicator.className = "h-3 w-3 rounded-full bg-green-500 mr-2 animate-pulse";
-                    } else {
-                        statusText.className = "text-sm font-medium text-red-500";
-                        indicator.className = "h-3 w-3 rounded-full bg-red-500 mr-2";
-                    }
-                } else {
-                    alert("Error: " + data.error);
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert("Failed to communicate with the server.");
-            });
+        // 🛡️ SECURITY: Prevents XSS attacks if logs or bot names contain malicious HTML/Scripts
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.toString().replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag])
+            );
         }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                if (data.success) renderBots(data.bots);
+            } catch (e) { 
+                console.error("Poll failed: Check server connection."); 
+            }
+        }
+
+        function renderBots(bots) {
+            const grid = document.getElementById('bot-grid');
+            
+            // Clear grid only if it's the first load to prevent flickering, otherwise replace content gracefully
+            if(grid.innerHTML.includes("Fetching Empire status")) grid.innerHTML = '';
+            
+            let newHTML = '';
+            
+            for (const [key, bot] of Object.entries(bots)) {
+                const isOnline = bot.status === 'Online';
+                const statusColor = isOnline ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-red-400 border-red-400/30 bg-red-400/10';
+                const topBorderColor = isOnline ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : 'bg-red-500';
+
+                newHTML += `
+                    <div class="group bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 border border-gray-700 hover:border-gray-500 transition-all duration-300 shadow-lg relative overflow-hidden flex flex-col">
+                        <div class="absolute top-0 left-0 w-full h-1 ${topBorderColor}"></div>
+                        
+                        <div class="flex justify-between items-start mb-3">
+                            <h2 class="text-xl font-bold truncate pr-2" title="${escapeHTML(bot.name)}">${escapeHTML(bot.name)}</h2>
+                            <span class="font-medium px-3 py-1 rounded-full text-xs border ${statusColor} shrink-0">
+                                ${escapeHTML(bot.status)}
+                            </span>
+                        </div>
+                        
+                        <p class="text-gray-400 text-xs mb-5 font-mono truncate bg-gray-900/50 p-1.5 rounded-lg border border-gray-800" title="${escapeHTML(bot.file)}">
+                            ${escapeHTML(bot.file)}
+                        </p>
+
+                        <div class="flex gap-4 mb-5 p-4 bg-gray-900/80 rounded-xl border border-gray-700 flex-1">
+                            <div class="text-center flex-1 border-r border-gray-700/50">
+                                <p class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Success</p>
+                                <p class="text-2xl font-bold text-green-400">${escapeHTML(bot.success)}</p>
+                            </div>
+                            <div class="text-center flex-1">
+                                <p class="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Errors</p>
+                                <p class="text-2xl font-bold text-red-400">${escapeHTML(bot.error)}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <button onclick="toggleBot('${escapeHTML(key)}', 'start')" class="flex items-center justify-center gap-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
+                                ▶️ Start
+                            </button>
+                            <button onclick="toggleBot('${escapeHTML(key)}', 'stop')" class="flex items-center justify-center gap-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
+                                🛑 Stop
+                            </button>
+                            <button onclick="toggleBot('${escapeHTML(key)}', 'restart')" class="flex items-center justify-center gap-1 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
+                                🔄 Res
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-between border-t border-gray-700/50 pt-4 mt-auto">
+                            <button onclick="openConfig('${escapeHTML(key)}')" class="text-sm font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                                ⚙️ Config
+                            </button>
+                            <button onclick="viewLogs('${escapeHTML(key)}')" class="text-sm font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                                📄 Logs
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            grid.innerHTML = newHTML || '<div class="col-span-full text-center text-gray-500 py-10">No bots configured yet.</div>';
+        }
+
+        async function toggleBot(key, action) {
+            await fetch(`/api/toggle/${key}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action })
+            });
+            fetchStatus(); // Immediately refresh status
+        }
+
+        async function viewLogs(key) {
+            document.getElementById('log-content').innerText = "Loading logs...";
+            document.getElementById('logsModal').classList.remove('hidden');
+            
+            try {
+                const res = await fetch(`/api/logs/${key}`);
+                const data = await res.json();
+                document.getElementById('log-content').innerText = data.logs || "No logs available.";
+            } catch(e) {
+                document.getElementById('log-content').innerText = "Failed to fetch logs.";
+            }
+        }
+
+        async function openConfig(key) {
+            try {
+                const res = await fetch(`/api/config/${key}`);
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('config-bot-key').value = key;
+                    document.getElementById('config-sources').value = data.config.sources.join(', ');
+                    document.getElementById('config-token').value = data.config.token || '';
+                    document.getElementById('config-ig').value = data.config.ig_id || '';
+                    document.getElementById('configModal').classList.remove('hidden');
+                } else {
+                    alert("Failed to load config.");
+                }
+            } catch(e) {
+                alert("Server connection error.");
+            }
+        }
+
+        async function saveConfig() {
+            const key = document.getElementById('config-bot-key').value;
+            const sources = document.getElementById('config-sources').value;
+            const token = document.getElementById('config-token').value;
+            const ig_id = document.getElementById('config-ig').value;
+
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Saving...';
+            btn.disabled = true;
+
+            try {
+                await fetch(`/api/config/${key}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sources, token, ig_id })
+                });
+                
+                document.getElementById('configModal').classList.add('hidden');
+                fetchStatus();
+            } catch(e) {
+                alert("Failed to save configuration.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Start polling
+        fetchStatus();
+        setInterval(fetchStatus, 10000);
     </script>
 </body>
 </html>
